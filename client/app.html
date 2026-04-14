@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHP | Premium Real Estate AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="app.js"></script>
+    <link rel="stylesheet" href="app.css">
+</head>
+
+<body>
+    <div class="overlay"></div>
+    <div class="bg-video-container">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80"
+            alt="Luxury Home">
+    </div>
+
+    <main class="wrapper">
+        <header class="glass-header animate-reveal">
+            <span class="badge">AI Powered</span>
+            <h1>Bangalore <span class="gradient-text">Valuator</span></h1>
+            <p>Predicting the future of your investment with 99% accuracy.</p>
+        </header>
+
+        <div class="glass-card animate-slide-up">
+            <div class="input-section">
+                <div class="field-container">
+                    <label>Living Area (Sq. Ft.)</label>
+                    <input class="modern-input" type="number" id="uiSqft" value="1200" step="100">
+                </div>
+
+                <div class="field-container">
+                    <label>Configuration (BHK)</label>
+                    <div class="segmented-control">
+                        <input type="radio" id="bhk-1" name="uiBHK" value="1"><label for="bhk-1">1</label>
+                        <input type="radio" id="bhk-2" name="uiBHK" value="2" checked><label for="bhk-2">2</label>
+                        <input type="radio" id="bhk-3" name="uiBHK" value="3"><label for="bhk-3">3</label>
+                        <input type="radio" id="bhk-4" name="uiBHK" value="4"><label for="bhk-4">4</label>
+                        <input type="radio" id="bhk-5" name="uiBHK" value="5"><label for="bhk-5">5+</label>
+                    </div>
+                </div>
+
+                <div class="field-container">
+                    <label>Bathrooms</label>
+                    <div class="segmented-control">
+                        <input type="radio" id="bath-1" name="uiBathrooms" value="1"><label for="bath-1">1</label>
+                        <input type="radio" id="bath-2" name="uiBathrooms" value="2" checked><label
+                            for="bath-2">2</label>
+                        <input type="radio" id="bath-3" name="uiBathrooms" value="3"><label for="bath-3">3</label>
+                        <input type="radio" id="bath-4" name="uiBathrooms" value="4"><label for="bath-4">4</label>
+                        <input type="radio" id="bath-5" name="uiBathrooms" value="5"><label for="bath-5">5</label>
+                    </div>
+                </div>
+
+                <div class="field-container">
+                    <label>Prime Location</label>
+                    <select class="modern-select" id="uiLocations">
+                        <option value="" disabled selected>Search Neighborhood...</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="glow-button" onclick="onClickedEstimatePrice()">
+                <span>Analyze Market Value</span>
+                <div class="shimmer"></div>
+            </button>
+
+            <div id="uiEstimatedPrice" class="price-container">
+                <div class="loader-dots" style="display:none;">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="price-result"></div>
+            </div>
+        </div>
+
+        <div class="disclaimer animate-slide-up">
+            <p>⚠️ <strong>Disclaimer:</strong> Price is an estimated value. Actual prices may vary based on market
+                trends, property condition, amenities, and exact location.</p>
+        </div>
+        <div class="social-images animate-slide-up">
+
+    <p style="margin-bottom:10px; color:#94a3b8;">Connect with me</p>
+
+    <!-- LinkedIn -->
+    <a href="https://www.linkedin.com/in/rutik-bhendarkar-41888a297/" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn">
+    </a>
+
+    <!-- GitHub -->
+    <a href="https://github.com/rutik-bhendarkar/" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" alt="GitHub">
+    </a>
+
+</div>
+    </main>
+</body>
+
+</html>
