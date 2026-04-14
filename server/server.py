@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
-import util
+from server import util
 
 app = Flask(__name__)
 # Allow all origins specifically for local development
