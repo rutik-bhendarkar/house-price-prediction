@@ -4,6 +4,7 @@ from server import util
 
 app = Flask(__name__)
 # Allow all origins specifically for local development
+util.load_saved_artifacts()
 CORS(app, resources={r"/*": {"origins": "*"}}) 
 
 @app.route('/get_location_names', methods=['GET'])
