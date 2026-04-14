@@ -39,13 +39,23 @@ function onClickedEstimatePrice() {
 
   const url = "https://house-price-prediction-hqrt.onrender.com/predict_home_price";
 
-  // Validation
+  // ✅ Basic validation
   if (!sqft.value || bhk === -1 || bathrooms === -1 || !location.value) {
     loader.hide();
     priceResultArea.html("<h2 style='color:red;'>Fill all fields</h2>").fadeIn();
     return;
   }
 
+  // 🔥 New validation (sqft >= 1000)
+  if (parseFloat(sqft.value) < 1000) {
+    loader.hide();
+    priceResultArea
+      .html("<h2 style='color:red;'>Minimum area should be 1000 sqft</h2>")
+      .fadeIn();
+    return;
+  }
+
+  // API call
   $.post(url, {
     total_sqft: parseFloat(sqft.value),
     bhk: bhk,
@@ -94,7 +104,6 @@ function loadLocations() {
 
         uiLocations.innerHTML = "";
 
-        // Placeholder
         const defaultOption = document.createElement("option");
         defaultOption.text = "Search Neighborhood...";
         defaultOption.disabled = true;
@@ -169,7 +178,7 @@ function initApp() {
   }
 }
 
-// Safe load (browser only)
+// Safe load
 if (typeof window !== "undefined") {
   window.onload = initApp;
 }
