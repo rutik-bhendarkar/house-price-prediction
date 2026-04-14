@@ -1,143 +1,175 @@
 /**
- * Helper function to retrieve selected Bathroom value
+ * Get selected Bathroom value
  */
 function getBathValue() {
-  var uiBathrooms = document.getElementsByName("uiBathrooms");
-  for (var i = 0; i < uiBathrooms.length; i++) {
+  const uiBathrooms = document.getElementsByName("uiBathrooms");
+  for (let i = 0; i < uiBathrooms.length; i++) {
     if (uiBathrooms[i].checked) return parseInt(uiBathrooms[i].value);
   }
   return -1;
 }
 
 /**
- * Helper function to retrieve selected BHK value
+ * Get selected BHK value
  */
 function getBHKValue() {
-  var uiBHK = document.getElementsByName("uiBHK");
-  for (var i = 0; i < uiBHK.length; i++) {
+  const uiBHK = document.getElementsByName("uiBHK");
+  for (let i = 0; i < uiBHK.length; i++) {
     if (uiBHK[i].checked) return parseInt(uiBHK[i].value);
   }
   return -1;
 }
 
 /**
- * Triggered when button clicked
+ * Predict Price
  */
 function onClickedEstimatePrice() {
   console.log("Analyze Market Value clicked");
-  
-  var sqft = document.getElementById("uiSqft");
-  var bhk = getBHKValue();
-  var bathrooms = getBathValue();
-  var location = document.getElementById("uiLocations");
-  var priceResultArea = $(".price-result");
-  var loader = $(".loader-dots");
+
+  const sqft = document.getElementById("uiSqft");
+  const bhk = getBHKValue();
+  const bathrooms = getBathValue();
+  const location = document.getElementById("uiLocations");
+
+  const priceResultArea = $(".price-result");
+  const loader = $(".loader-dots");
 
   priceResultArea.hide();
   loader.fadeIn();
 
-  // ✅ FIXED: Use Render backend
-  var url = "https://house-price-prediction-hqrt.onrender.com/predict_home_price";
+  const url = "https://house-price-prediction-hqrt.onrender.com/predict_home_price";
 
-  // ✅ Validation added
-  if (!sqft.value || bhk == -1 || bathrooms == -1 || !location.value) {
-      loader.hide();
-      priceResultArea.html("<h2 style='color:red;'>Fill all fields</h2>").fadeIn();
-      return;
+  // Validation
+  if (!sqft.value || bhk === -1 || bathrooms === -1 || !location.value) {
+    loader.hide();
+    priceResultArea.html("<h2 style='color:red;'>Fill all fields</h2>").fadeIn();
+    return;
   }
 
   $.post(url, {
-      total_sqft: parseFloat(sqft.value),
-      bhk: bhk,
-      bath: bathrooms,
-      location: location.value
-  }, function(data, status) {
-      console.log("Prediction received:", data);
+    total_sqft: parseFloat(sqft.value),
+    bhk: bhk,
+    bath: bathrooms,
+    location: location.value
+  })
+  .done(function (data) {
+    console.log("Prediction:", data);
 
-      setTimeout(function() {
-          loader.hide();
-          priceResultArea.html("<h2>₹ " + data.estimated_price + " Lakh</h2>").fadeIn();
-      }, 800);
-  }).fail(function() {
+    setTimeout(function () {
       loader.hide();
-      priceResultArea.html("<h2 style='color: #ef4444;'>Server Error</h2>").fadeIn();
+
+      if (data && data.estimated_price !== undefined) {
+        priceResultArea
+          .html(`<h2>₹ ${data.estimated_price} Lakh</h2>`)
+          .fadeIn();
+      } else {
+        priceResultArea
+          .html("<h2 style='color:red;'>Invalid Response</h2>")
+          .fadeIn();
+      }
+    }, 800);
+  })
+  .fail(function () {
+    loader.hide();
+    priceResultArea
+      .html("<h2 style='color:#ef4444;'>Server Error</h2>")
+      .fadeIn();
+    console.error("Backend error");
   });
 }
 
 /**
  * Load locations
  */
-function onPageLoad() {
-  console.log("Fetching locations");
+function loadLocations() {
+  console.log("Fetching locations...");
 
-  // ✅ FIXED: Use Render backend
-  var url = "https://house-price-prediction-hqrt.onrender.com/get_location_names";
+  const url = "https://house-price-prediction-hqrt.onrender.com/get_location_names";
 
-  $.get(url, function(data, status) {
-      if(data && data.locations) {
-          var uiLocations = $('#uiLocations');
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.locations) {
+        const uiLocations = document.getElementById("uiLocations");
 
-          uiLocations.empty();
-          uiLocations.append(new Option("Search Neighborhood...", "", true, true));
-          $('#uiLocations option:first').attr('disabled', 'disabled');
+        uiLocations.innerHTML = "";
 
-          for(var i in data.locations) {
-              var loc = data.locations[i];
-              var name = loc.split(' ').map(w => w[0].toUpperCase() + w.substr(1).toLowerCase()).join(' ');
-              uiLocations.append(new Option(name, loc));
-          }
+        // Placeholder
+        const defaultOption = document.createElement("option");
+        defaultOption.text = "Search Neighborhood...";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        uiLocations.add(defaultOption);
+
+        data.locations.forEach(loc => {
+          const name = loc
+            .split(" ")
+            .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(" ");
+
+          const option = document.createElement("option");
+          option.value = loc;
+          option.text = name;
+
+          uiLocations.add(option);
+        });
+
+        console.log("Locations loaded ✅");
       }
-  }).fail(function() {
-      console.error("Backend not reachable");
-  });
+    })
+    .catch(err => {
+      console.error("Error loading locations ❌", err);
+    });
 }
 
 /**
  * Area status
  */
 function updateAreaStatus() {
-    let sqftInput = document.getElementById("uiSqft");
-    let status = document.getElementById("areaStatus");
+  const sqftInput = document.getElementById("uiSqft");
+  const status = document.getElementById("areaStatus");
 
-    if (!sqftInput || !status) return;
+  if (!sqftInput || !status) return;
 
-    let sqft = sqftInput.value;
+  const sqft = sqftInput.value;
 
-    if (sqft < 800) status.innerHTML = "(Compact)";
-    else if (sqft <= 1500) status.innerHTML = "(Standard)";
-    else status.innerHTML = "(Premium)";
+  if (sqft < 800) status.innerHTML = "(Compact)";
+  else if (sqft <= 1500) status.innerHTML = "(Standard)";
+  else status.innerHTML = "(Premium)";
 }
 
 /**
- * Tilt effect (SAFE)
+ * Tilt effect
  */
 function applyTilt() {
-    const card = document.getElementById('mainCard');
-    if (!card) return;
+  const card = document.getElementById("mainCard");
+  if (!card) return;
 
-    document.addEventListener('mousemove', (e) => {
-        if(window.innerWidth < 1000) return;
-        let xAxis = (window.innerWidth / 2 - e.pageX) / 50;
-        let yAxis = (window.innerHeight / 2 - e.pageY) / 50;
-        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-    });
+  document.addEventListener("mousemove", (e) => {
+    if (window.innerWidth < 1000) return;
+
+    const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
+    const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
+
+    card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+  });
 }
 
 /**
- * Extend page load safely
+ * Init App
  */
-const originalOnPageLoad = onPageLoad;
+function initApp() {
+  loadLocations();
+  applyTilt();
 
-onPageLoad = function() {
-    originalOnPageLoad();
-    applyTilt();
+  const sqftInput = document.getElementById("uiSqft");
+  if (sqftInput) {
+    sqftInput.addEventListener("input", updateAreaStatus);
+    updateAreaStatus();
+  }
+}
 
-    var sqftInput = document.getElementById("uiSqft");
-    if (sqftInput) {
-        sqftInput.addEventListener("input", updateAreaStatus);
-        updateAreaStatus();
-    }
-};
-
-// Load
-window.onload = onPageLoad;
+// Safe load (browser only)
+if (typeof window !== "undefined") {
+  window.onload = initApp;
+}
