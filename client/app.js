@@ -21,8 +21,7 @@ function getBHKValue() {
 }
 
 /**
- * Triggered when the "Analyze Market Value" button is clicked.
- * Handles the POST request to the Flask server and UI animations.
+ * Triggered when button clicked
  */
 function onClickedEstimatePrice() {
   console.log("Analyze Market Value clicked");
@@ -34,11 +33,18 @@ function onClickedEstimatePrice() {
   var priceResultArea = $(".price-result");
   var loader = $(".loader-dots");
 
-  // Reset UI: Hide previous results and show the loader
   priceResultArea.hide();
   loader.fadeIn();
 
-  var url = "https://house-price-prediction-hqrt.onrender.com/predict_home_price"; 
+  // ✅ FIXED: Use Render backend
+  var url = "https://house-price-prediction-hqrt.onrender.com/predict_home_price";
+
+  // ✅ Validation added
+  if (!sqft.value || bhk == -1 || bathrooms == -1 || !location.value) {
+      loader.hide();
+      priceResultArea.html("<h2 style='color:red;'>Fill all fields</h2>").fadeIn();
+      return;
+  }
 
   $.post(url, {
       total_sqft: parseFloat(sqft.value),
@@ -46,84 +52,92 @@ function onClickedEstimatePrice() {
       bath: bathrooms,
       location: location.value
   }, function(data, status) {
-      console.log("Prediction received: " + data.estimated_price);
-      
-      // UX DELAY: 800ms delay to make the AI analysis feel authentic
+      console.log("Prediction received:", data);
+
       setTimeout(function() {
           loader.hide();
-          // Inject the price result with fade-in animation
-          priceResultArea.html("<h2>₹ " + data.estimated_price.toString() + " Lakh</h2>").fadeIn();
-          console.log("Status: " + status);
+          priceResultArea.html("<h2>₹ " + data.estimated_price + " Lakh</h2>").fadeIn();
       }, 800);
   }).fail(function() {
-      // Handle connection errors
       loader.hide();
       priceResultArea.html("<h2 style='color: #ef4444;'>Server Error</h2>").fadeIn();
-      console.error("Could not connect to Flask server.");
   });
 }
 
 /**
- * Triggered on page load to fetch the list of locations from the server.
+ * Load locations
  */
 function onPageLoad() {
-  console.log("Document loaded - fetching locations");
-  var url = "http://127.0.0.1:5000/get_location_names"; 
+  console.log("Fetching locations");
+
+  // ✅ FIXED: Use Render backend
+  var url = "https://house-price-prediction-hqrt.onrender.com/get_location_names";
 
   $.get(url, function(data, status) {
       if(data && data.locations) {
           var uiLocations = $('#uiLocations');
-          
-          // Clear existing options
+
           uiLocations.empty();
-          
-          // Add and disable the placeholder
           uiLocations.append(new Option("Search Neighborhood...", "", true, true));
-          $('#uiLocations option:first').attr('disabled', 'disabled'); 
-          
-          // Populate the dropdown with formatted location names
+          $('#uiLocations option:first').attr('disabled', 'disabled');
+
           for(var i in data.locations) {
               var loc = data.locations[i];
-              // Title Case formatting (e.g., "electronic city" -> "Electronic City")
               var name = loc.split(' ').map(w => w[0].toUpperCase() + w.substr(1).toLowerCase()).join(' ');
               uiLocations.append(new Option(name, loc));
           }
-          console.log("Locations loaded successfully");
       }
   }).fail(function() {
-      console.error("Critical Error: Backend server unreachable at port 5000");
+      console.error("Backend not reachable");
   });
 }
-// --- ADD THIS TO YOUR app.js ---
 
+/**
+ * Area status
+ */
 function updateAreaStatus() {
-    let sqft = document.getElementById("uiSqft").value;
+    let sqftInput = document.getElementById("uiSqft");
     let status = document.getElementById("areaStatus");
+
+    if (!sqftInput || !status) return;
+
+    let sqft = sqftInput.value;
+
     if (sqft < 800) status.innerHTML = "(Compact)";
-    else if (sqft >= 800 && sqft <= 1500) status.innerHTML = "(Standard)";
+    else if (sqft <= 1500) status.innerHTML = "(Standard)";
     else status.innerHTML = "(Premium)";
 }
 
-// Interactive Mouse Tilt Effect
+/**
+ * Tilt effect (SAFE)
+ */
 function applyTilt() {
     const card = document.getElementById('mainCard');
+    if (!card) return;
+
     document.addEventListener('mousemove', (e) => {
-        if(window.innerWidth < 1000) return; // Disable on mobile for performance
+        if(window.innerWidth < 1000) return;
         let xAxis = (window.innerWidth / 2 - e.pageX) / 50;
         let yAxis = (window.innerHeight / 2 - e.pageY) / 50;
         card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
     });
 }
 
-// Modify your existing onPageLoad to include these
+/**
+ * Extend page load safely
+ */
 const originalOnPageLoad = onPageLoad;
+
 onPageLoad = function() {
     originalOnPageLoad();
     applyTilt();
-    document.getElementById("uiSqft").addEventListener("input", updateAreaStatus);
-    updateAreaStatus();
+
+    var sqftInput = document.getElementById("uiSqft");
+    if (sqftInput) {
+        sqftInput.addEventListener("input", updateAreaStatus);
+        updateAreaStatus();
+    }
 };
 
-// Bind the load event
+// Load
 window.onload = onPageLoad;
-
